@@ -16,7 +16,7 @@ python3 -m pip install -r requirements.txt
 docker start cassandra || docker run --name cassandra -d cassandra
 ```
 
-#### Copy data to container
+### Copy data to container
 ```
 docker cp data.cql cassandra:/root/data.cql
 docker exec -it cassandra bash -c "cqlsh -u cassandra -p cassandra"
