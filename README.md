@@ -7,7 +7,7 @@ A place to share cassandra app code
 python3 -m pip install virtualenv
 virtualenv -p python3 ./venv
 source ./venv/bin/activate
-python3 -m pip install python-cassandra
+python3 -m pip install -r requirements.txt
 ```
 
 
