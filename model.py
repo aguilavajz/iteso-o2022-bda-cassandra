@@ -8,7 +8,7 @@ log = logging.getLogger()
 CREATE_KEYSPACE = """
         CREATE KEYSPACE IF NOT EXISTS %s
         WITH replication = { 'class': 'SimpleStrategy', 'replication_factor': '1' }
-""" 
+"""
 
 CREATE_USERS_TABLE = """
     CREATE TABLE IF NOT EXISTS accounts_by_user (
@@ -38,7 +38,7 @@ SELECT_USER_ACCOUNTS = """
 def create_keyspace(session, keyspace):
     log.info(f"Creating keyspace: {keyspace}")
     session.execute(CREATE_KEYSPACE % keyspace)
- 
+
 
 def create_schema(session):
     log.info("Creating model schema")
@@ -53,7 +53,3 @@ def get_user_accounts(session, username):
     for row in rows:
         print(f"=== Account: {row.account_number} ===")
         print(f"- Cash Balance: {row.cash_balance}")
-    
-
-
- 
