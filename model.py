@@ -29,6 +29,19 @@ CREATE_POSSITIONS_BY_ACCOUNT_TABLE = """
     )
 """
 
+CREATE_TRADES_BY_ACCOUNT_DATE_TABLE = """
+    CREATE TABLE IF NOT EXISTS trades_by_a_d (
+        account TEXT,
+        trade_id TIMEUUID,
+        type TEXT,
+        symbol TEXT,
+        shares DECIMAL,
+        price DECIMAL,
+        amount DECIMAL,
+        PRIMARY KEY ((account), trade_id)
+    )
+"""
+
 SELECT_USER_ACCOUNTS = """
     SELECT username, account_number, name, cash_balance
     FROM accounts_by_user
@@ -44,6 +57,7 @@ def create_schema(session):
     log.info("Creating model schema")
     session.execute(CREATE_USERS_TABLE)
     session.execute(CREATE_POSSITIONS_BY_ACCOUNT_TABLE)
+    session.execute(CREATE_TRADES_BY_ACCOUNT_DATE_TABLE)
 
 
 def get_user_accounts(session, username):
