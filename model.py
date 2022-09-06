@@ -6,8 +6,8 @@ log = logging.getLogger()
 
 
 CREATE_KEYSPACE = """
-        CREATE KEYSPACE IF NOT EXISTS %s
-        WITH replication = { 'class': 'SimpleStrategy', 'replication_factor': '1' }
+        CREATE KEYSPACE IF NOT EXISTS {}
+        WITH replication = {{ 'class': 'SimpleStrategy', 'replication_factor': {} }}
 """
 
 CREATE_USERS_TABLE = """
@@ -48,9 +48,9 @@ SELECT_USER_ACCOUNTS = """
     WHERE username = ?
 """
 
-def create_keyspace(session, keyspace):
-    log.info(f"Creating keyspace: {keyspace}")
-    session.execute(CREATE_KEYSPACE % keyspace)
+def create_keyspace(session, keyspace, replication_factor):
+    log.info(f"Creating keyspace: {keyspace} with replication factor {replication_factor}")
+    session.execute(CREATE_KEYSPACE.format(keyspace, replication_factor))
 
 
 def create_schema(session):

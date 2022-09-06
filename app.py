@@ -17,6 +17,7 @@ log.addHandler(handler)
 # Read env vars releated to Cassandra App
 CLUSTER_IPS = os.getenv('CASSANDRA_CLUSTER_IPS', '172.18.0.2')
 KEYSPACE = os.getenv('CASSANDRA_KEYSPACE', 'investments')
+REPLICATION_FACTOR = os.getenv('CASSANDRA_REPLICATION_FACTOR', '1')
 
 
 def print_menu():
@@ -54,7 +55,7 @@ def main():
     cluster = Cluster(CLUSTER_IPS.split(','))
     session = cluster.connect()
 
-    model.create_keyspace(session, KEYSPACE)
+    model.create_keyspace(session, KEYSPACE, REPLICATION_FACTOR)
     session.set_keyspace(KEYSPACE)
 
     model.create_schema(session)
