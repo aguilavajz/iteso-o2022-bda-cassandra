@@ -39,7 +39,7 @@ CREATE_TRADES_BY_ACCOUNT_DATE_TABLE = """
         price DECIMAL,
         amount DECIMAL,
         PRIMARY KEY ((account), trade_id)
-    )
+    ) WITH CLUSTERING ORDER BY (trade_id DESC)
 """
 
 SELECT_USER_ACCOUNTS = """
