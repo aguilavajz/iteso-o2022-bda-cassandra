@@ -15,7 +15,7 @@ handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(
 log.addHandler(handler)
 
 # Read env vars releated to Cassandra App
-CLUSTER_IPS = os.getenv('CASSANDRA_CLUSTER_IPS', '172.18.0.2')
+CLUSTER_IPS = os.getenv('CASSANDRA_CLUSTER_IPS', '172.17.0.2')
 KEYSPACE = os.getenv('CASSANDRA_KEYSPACE', 'investments')
 REPLICATION_FACTOR = os.getenv('CASSANDRA_REPLICATION_FACTOR', '1')
 
