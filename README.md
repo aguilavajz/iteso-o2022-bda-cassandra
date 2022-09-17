@@ -29,7 +29,7 @@ docker cp tools/data.cql cassandra:/root/data.cql
 docker exec -it cassandra bash -c "cqlsh -u cassandra -p cassandra"
 #In cqlsh:
 USE investments;
-SOURCE "/root/data.cql"
+SOURCE 'root/data.cql'
 ```
 
 ### Start a Cassandra cluster with 2 nodes
