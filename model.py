@@ -69,6 +69,19 @@ CREATE_TRADES_BY_ACCOUNT_SYMBOL_TABLE = """
     )
 """
 
+CREATE_TRADES_BY_ACCOUNT_TYPE_SYMBOL_TABLE = """
+    CREATE TABLE IF NOT EXISTS trades_by_type_symbol (
+        account TEXT,
+        trade_id TIMEUUID,
+        type TEXT,
+        symbol TEXT,
+        shares DECIMAL,
+        price DECIMAL,
+        amount DECIMAL,
+        PRIMARY KEY ((account), type, symbol, trade_id)
+    )
+"""
+
 SELECT_USER_ACCOUNTS = """
     SELECT *
     FROM accounts_by_user
@@ -107,6 +120,14 @@ SELECT_TRANSACTIONS_BY_SYMBOL = """
     and symbol = ?
 """
 
+SELECT_TRANSACTIONS_BY_TYPE_SYMBOL = """
+    SELECT account,dateof(trade_id) as trade_id,amount,price,shares,symbol,type
+    FROM trades_by_type_symbol
+    WHERE account = ?
+    and type = ?
+    and symbol = ?
+"""
+
 SELECT_TRANSACTIONS_BY_ACCOUNT_DATE = """
     SELECT account,dateof(trade_id) as trade_id,amount,price,shares,symbol,type
     FROM trades_by_date
@@ -132,6 +153,16 @@ SELECT_TRANSACTIONS_BY_SYMBOL_DATE = """
     and trade_id < minTimeuuid(?)
 """
 
+SELECT_TRANSACTIONS_BY_TYPE_SYMBOL_DATE = """
+    SELECT account,dateof(trade_id) as trade_id,amount,price,shares,symbol,type
+    FROM trades_by_type_symbol
+    WHERE account = ?
+    and type = ?
+    and symbol = ?
+    and trade_id > maxTimeuuid(?)
+    and trade_id < minTimeuuid(?)
+"""
+
 def create_keyspace(session, keyspace, replication_factor):
     log.info(f"Creating keyspace: {keyspace} with replication factor {replication_factor}")
     session.execute(CREATE_KEYSPACE.format(keyspace, replication_factor))
@@ -143,6 +174,7 @@ def create_schema(session):
     session.execute(CREATE_TRADES_BY_ACCOUNT_DATE_TABLE)
     session.execute(CREATE_TRADES_BY_ACCOUNT_TYPE_TABLE)
     session.execute(CREATE_TRADES_BY_ACCOUNT_SYMBOL_TABLE)
+    session.execute(CREATE_TRADES_BY_ACCOUNT_TYPE_SYMBOL_TABLE)
 
 def get_user_accounts(session, username):
     log.info(f"Retrieving {username} accounts")
@@ -167,12 +199,18 @@ def get_transactions(session,option):
     if option == 'account':
         stmt = session.prepare(SELECT_TRANSACTIONS_BY_ACCOUNT)
     if option == 'type':
-        type = input('Buy or Sell: ')
+        type = input('buy or sell: ')
         stmt = session.prepare(SELECT_TRANSACTIONS_BY_TYPE)
         array.append(type)
     if option == 'symbol':
         symbol = input('Enter instrument symbol: ')
         stmt = session.prepare(SELECT_TRANSACTIONS_BY_SYMBOL)
+        array.append(symbol)
+    if option == 'type_symbol':
+        type = input('buy or sell: ')
+        symbol = input('Enter instrument symbol: ')
+        stmt = session.prepare(SELECT_TRANSACTIONS_BY_TYPE_SYMBOL)
+        array.append(type)
         array.append(symbol)
 
     rows = session.execute(stmt, array)
@@ -198,6 +236,8 @@ def get_transactions(session,option):
             stmt = session.prepare(SELECT_TRANSACTIONS_BY_TYPE_DATE)
         if option == 'symbol':
             stmt = session.prepare(SELECT_TRANSACTIONS_BY_SYMBOL_DATE)
+        if option == 'type_symbol':
+            stmt = session.prepare(SELECT_TRANSACTIONS_BY_TYPE_SYMBOL_DATE)
 
         rows = session.execute(stmt, array)
         for row in rows:

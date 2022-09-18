@@ -35,8 +35,9 @@ def print_menu():
 def print_trade_history_menu():
     thm_options = {
         1: "By Account",
-        2: "By Transaction Type (Buy/Sell)",
+        2: "By Transaction Type (buy/sell)",
         3: "By Instrument Symbol",
+        4: "By Transaction Type (buy/sell) and Symbol"
     }
     for key in thm_options.keys():
         print('    ', key, '--', thm_options[key])
@@ -80,6 +81,8 @@ def main():
                 model.get_transactions(session,'type')
             if tv_option == 3:
                 model.get_transactions(session,'symbol')
+            if tv_option == 4:
+                model.get_transactions(session,'type_symbol')
         if option == 4:
             username = set_username()
         if option == 5:
