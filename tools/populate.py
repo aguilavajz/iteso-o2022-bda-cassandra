@@ -24,7 +24,10 @@ INSTRUMENTS = [
 def cql_stmt_generator(accounts_num=10, positions_by_account=100, trades_by_account=1000):
     acc_stmt = "INSERT INTO accounts_by_user (username, account_number, cash_balance, name) VALUES ('{}', '{}', {}, '{}');"
     pos_stmt = "INSERT INTO positions_by_account(account, symbol, quantity) VALUES ('{}', '{}', {});"
-    tad_stmt = "INSERT INTO trades_by_a_d (account, trade_id, type, symbol, shares, price, amount) VALUES('{}', {}, '{}', '{}', {}, {}, {});"
+    tad_stmt = "INSERT INTO trades_by_account (account, trade_id, type, symbol, shares, price, amount) VALUES('{}', {}, '{}', '{}', {}, {}, {});"
+    tatd_stmt = "INSERT INTO trades_by_date (account, trade_id, type, symbol, shares, price, amount) VALUES('{}', {}, '{}', '{}', {}, {}, {});"
+    tastd_stmt = "INSERT INTO trades_by_type (account, trade_id, type, symbol, shares, price, amount) VALUES('{}', {}, '{}', '{}', {}, {}, {});"
+    tasd_stmt = "INSERT INTO trades_by_symbol (account, trade_id, type, symbol, shares, price, amount) VALUES('{}', {}, '{}', '{}', {}, {}, {});"
     accounts = []
     with open(CQL_FILE, "w") as fd:
         # Generate accounts by user
@@ -37,7 +40,7 @@ def cql_stmt_generator(accounts_num=10, positions_by_account=100, trades_by_acco
             fd.write('\n')
         fd.write('\n\n')
 
-        # Genetate possitions by account
+        # Generate possitions by account
         acc_sym = {}
         for i in range(positions_by_account):
             while True:
@@ -61,7 +64,12 @@ def cql_stmt_generator(accounts_num=10, positions_by_account=100, trades_by_acco
             amount = shares * price
             fd.write(tad_stmt.format(acc, trade_id, trade_type, sym, shares, price, amount))
             fd.write('\n')
-
+            fd.write(tatd_stmt.format(acc, trade_id, trade_type, sym, shares, price, amount))
+            fd.write('\n')
+            fd.write(tastd_stmt.format(acc, trade_id, trade_type, sym, shares, price, amount))
+            fd.write('\n')
+            fd.write(tasd_stmt.format(acc, trade_id, trade_type, sym, shares, price, amount))
+            fd.write('\n')
 
 def random_date(start_date, end_date):
     time_between_dates = end_date - start_date
@@ -70,10 +78,8 @@ def random_date(start_date, end_date):
     rand_date = start_date + datetime.timedelta(days=random_number_of_days)
     return time_uuid.TimeUUID.with_timestamp(time_uuid.mkutime(rand_date))
 
-
 def main():
     cql_stmt_generator()
-
 
 if __name__ == "__main__":
     main()

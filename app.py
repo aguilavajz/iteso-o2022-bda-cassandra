@@ -34,14 +34,12 @@ def print_menu():
 
 def print_trade_history_menu():
     thm_options = {
-        1: "All",
-        2: "Date Range",
-        3: "Transaction Type (Buy/Sell)",
-        4: "Instrument Symbol",
+        1: "By Account",
+        2: "By Transaction Type (Buy/Sell)",
+        3: "By Instrument Symbol",
     }
     for key in thm_options.keys():
         print('    ', key, '--', thm_options[key])
-
 
 def set_username():
     username = input('**** Username to use app: ')
@@ -68,15 +66,20 @@ def main():
         if option == 1:
             model.get_user_accounts(session, username)
         if option == 2:
-            pass
+            model.get_positions(session)
         if option == 3:
             print_trade_history_menu()
             tv_option = int(input('Enter your trade view choice: '))
+            if tv_option == 1:
+                model.get_transactions(session,'account')
+            if tv_option == 2:
+                model.get_transactions(session,'type')
+            if tv_option == 3:
+                model.get_transactions(session,'symbol')
         if option == 4:
             username = set_username()
         if option == 5:
             exit(0)
-
 
 if __name__ == '__main__':
     main()
