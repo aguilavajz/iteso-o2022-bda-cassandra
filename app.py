@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import logging
 import os
-
+import random
 
 from cassandra.cluster import Cluster
 
@@ -34,20 +34,23 @@ def print_menu():
 
 def print_trade_history_menu():
     thm_options = {
-        1: "All",
-        2: "Date Range",
-        3: "Transaction Type (Buy/Sell)",
-        4: "Instrument Symbol",
+        1: "By Account",
+        2: "By Transaction Type (buy/sell)",
+        3: "By Instrument Symbol",
+        4: "By Transaction Type (buy/sell) and Symbol"
     }
     for key in thm_options.keys():
         print('    ', key, '--', thm_options[key])
-
 
 def set_username():
     username = input('**** Username to use app: ')
     log.info(f"Username set to {username}")
     return username
 
+
+def get_instrument_value(instrument):
+    instr_mock_sum = sum(bytearray(instrument, encoding='utf-8'))
+    return random.uniform(1.0, instr_mock_sum)
 
 
 def main():
@@ -68,15 +71,22 @@ def main():
         if option == 1:
             model.get_user_accounts(session, username)
         if option == 2:
-            pass
+            model.get_positions(session)
         if option == 3:
             print_trade_history_menu()
             tv_option = int(input('Enter your trade view choice: '))
+            if tv_option == 1:
+                model.get_transactions(session,'account')
+            if tv_option == 2:
+                model.get_transactions(session,'type')
+            if tv_option == 3:
+                model.get_transactions(session,'symbol')
+            if tv_option == 4:
+                model.get_transactions(session,'type_symbol')
         if option == 4:
             username = set_username()
         if option == 5:
             exit(0)
-
 
 if __name__ == '__main__':
     main()
