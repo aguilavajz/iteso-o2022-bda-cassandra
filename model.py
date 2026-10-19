@@ -163,9 +163,22 @@ SELECT_TRANSACTIONS_BY_TYPE_SYMBOL_DATE = """
     and trade_id < minTimeuuid(?)
 """
 
+# Cache for prepared statements to prevent unnecessary network roundtrips
+_prepared_statements = {}
+
+
+def _get_prepared_statement(session, query):
+    if query not in _prepared_statements:
+        _prepared_statements[query] = session.prepare(query)
+    return _prepared_statements[query]
+
+
 def create_keyspace(session, keyspace, replication_factor):
-    log.info(f"Creating keyspace: {keyspace} with replication factor {replication_factor}")
+    log.info(
+        f"Creating keyspace: {keyspace} with replication factor {replication_factor}"
+    )
     session.execute(CREATE_KEYSPACE.format(keyspace, replication_factor))
+
 
 def create_schema(session):
     log.info("Creating model schema")
@@ -176,40 +189,43 @@ def create_schema(session):
     session.execute(CREATE_TRADES_BY_ACCOUNT_SYMBOL_TABLE)
     session.execute(CREATE_TRADES_BY_ACCOUNT_TYPE_SYMBOL_TABLE)
 
+
 def get_user_accounts(session, username):
     log.info(f"Retrieving {username} accounts")
-    stmt = session.prepare(SELECT_USER_ACCOUNTS)
+    stmt = _get_prepared_statement(session, SELECT_USER_ACCOUNTS)
     rows = session.execute(stmt, [username])
     for row in rows:
         print(f"=== Account: {row.account_number} ===")
         print(f"- Cash Balance: {row.cash_balance}")
 
+
 def get_positions(session):
-    option = input('Enter your account: ')
-    stmt = session.prepare(SELECT_POSITIONS)
+    option = input("Enter your account: ")
+    stmt = _get_prepared_statement(session, SELECT_POSITIONS)
     rows = session.execute(stmt, [option])
     for row in rows:
         print(f"=== Account: {row.account} ===")
         print(f"- Symbol: {row.symbol}")
         print(f"- Quantity: {row.quantity}")
 
-def get_transactions(session,option):
-    account = input('Enter account: ')
+
+def get_transactions(session, option):
+    account = input("Enter account: ")
     array = [account]
-    if option == 'account':
-        stmt = session.prepare(SELECT_TRANSACTIONS_BY_ACCOUNT)
-    if option == 'type':
-        type = input('buy or sell: ')
-        stmt = session.prepare(SELECT_TRANSACTIONS_BY_TYPE)
+    if option == "account":
+        stmt = _get_prepared_statement(session, SELECT_TRANSACTIONS_BY_ACCOUNT)
+    if option == "type":
+        type = input("buy or sell: ")
+        stmt = _get_prepared_statement(session, SELECT_TRANSACTIONS_BY_TYPE)
         array.append(type)
-    if option == 'symbol':
-        symbol = input('Enter instrument symbol: ')
-        stmt = session.prepare(SELECT_TRANSACTIONS_BY_SYMBOL)
+    if option == "symbol":
+        symbol = input("Enter instrument symbol: ")
+        stmt = _get_prepared_statement(session, SELECT_TRANSACTIONS_BY_SYMBOL)
         array.append(symbol)
-    if option == 'type_symbol':
-        type = input('buy or sell: ')
-        symbol = input('Enter instrument symbol: ')
-        stmt = session.prepare(SELECT_TRANSACTIONS_BY_TYPE_SYMBOL)
+    if option == "type_symbol":
+        type = input("buy or sell: ")
+        symbol = input("Enter instrument symbol: ")
+        stmt = _get_prepared_statement(session, SELECT_TRANSACTIONS_BY_TYPE_SYMBOL)
         array.append(type)
         array.append(symbol)
 
@@ -223,21 +239,25 @@ def get_transactions(session,option):
         print(f"- Price: $ {round(row.price,2)}")
         print(f"- Amount: {round(row.amount,2)}")
 
-    filter = input('Would you like to filter the results by date (Y/N)?: ')
-    if filter == 'Y':
-        start_date = datetime.strptime(input("Enter Start Date (YYYY-MM-DD):"),'%Y-%m-%d')
-        end_date = datetime.strptime(input("Enter End Date (YYYY-MM-DD):"),'%Y-%m-%d')
+    filter = input("Would you like to filter the results by date (Y/N)?: ")
+    if filter == "Y":
+        start_date = datetime.strptime(
+            input("Enter Start Date (YYYY-MM-DD):"), "%Y-%m-%d"
+        )
+        end_date = datetime.strptime(input("Enter End Date (YYYY-MM-DD):"), "%Y-%m-%d")
 
         array.append(start_date)
         array.append(end_date)
-        if option == 'account':
-            stmt = session.prepare(SELECT_TRANSACTIONS_BY_ACCOUNT_DATE)
-        if option == 'type':
-            stmt = session.prepare(SELECT_TRANSACTIONS_BY_TYPE_DATE)
-        if option == 'symbol':
-            stmt = session.prepare(SELECT_TRANSACTIONS_BY_SYMBOL_DATE)
-        if option == 'type_symbol':
-            stmt = session.prepare(SELECT_TRANSACTIONS_BY_TYPE_SYMBOL_DATE)
+        if option == "account":
+            stmt = _get_prepared_statement(session, SELECT_TRANSACTIONS_BY_ACCOUNT_DATE)
+        if option == "type":
+            stmt = _get_prepared_statement(session, SELECT_TRANSACTIONS_BY_TYPE_DATE)
+        if option == "symbol":
+            stmt = _get_prepared_statement(session, SELECT_TRANSACTIONS_BY_SYMBOL_DATE)
+        if option == "type_symbol":
+            stmt = _get_prepared_statement(
+                session, SELECT_TRANSACTIONS_BY_TYPE_SYMBOL_DATE
+            )
 
         rows = session.execute(stmt, array)
         for row in rows:
@@ -248,7 +268,3 @@ def get_transactions(session,option):
             print(f"- Shares: {row.shares}")
             print(f"- Price: $ {round(row.price,2)}")
             print(f"- Amount: {round(row.amount,2)}")
-
-
-
-
